@@ -1,9 +1,9 @@
 import streamlit as st
 import PyPDF2
 import google.generativeai as genai
-import os
+import time
 
-genai_API_KEY = "hehe"
+genai_API_KEY = st.secrets["genai_API"]
 
 genai.configure(api_key=genai_API_KEY)
 model = genai.GenerativeModel(model_name='gemini-pro')
@@ -72,17 +72,16 @@ def generate_summary(text, level):
     I am developing a text summarization application for students and researchers to efficiently grasp the key points of complex documents.
     The input text is already divided into sections using delimiters. The text given will have sections demarcated by the tag <section/>, where the first sentence of that section will generally be the title of that section.
     Each section has to be represented in the summary.
-    You can summarize anything according to 10 levels. The specific details are given as such-
-    Level 1: No Summarization (Original Text): Return the entire text without any modifications, preserving all original sentences and details
-    Level 2: Key Sentences (Sentence Extraction): Identify the most important sentences from each section, representing the main points without additional explanations.
-    Level 3: Section Overviews (Brief Summaries): Generate concise summaries for each section, capturing the main points and supporting details in a few sentences.
-    Level 4: Argument/Finding Identification (Focus on Content): Identify and summarize the main arguments, findings, or conclusions within each section, omitting irrelevant details.
-    Level 5: Textual Overview (Holistic Summary): Create a concise summary of the entire text, highlighting key themes, relationships between sections, and the overall message.
-    Level 6: Keyword Extraction and Analysis (Deep Content Exploration): Identify and analyze key keywords and phrases throughout the text, revealing hidden connections and deeper meanings.
-    Level 7: Causal Inference and Relationship Mapping (Advanced Analysis): Infer causal relationships between events or concepts, and map the connections between different sections of the text.
-    Level 8: Contextual Awareness and Fact-Checking (Enhanced Accuracy): Integrate external knowledge and fact-checking mechanisms to verify information and provide contextually relevant summaries.
-    Level 9: Multiple Perspectives and Counterarguments (Critical Analysis): Identify and summarize potential counterarguments or alternative viewpoints presented in the text, fostering critical thinking.
-    Level 10: Abstract Conceptualization and Synthesis (Highest Abstraction): Extract the core concepts, themes, and implications of the text, presenting a high-level understanding without losing critical details.
+    You can summarize anything according to 9 levels. The specific details are given as such-
+    Level 1: Key Sentences (Sentence Extraction): Identify the most important sentences from each section, representing the main points without additional explanations.
+    Level 2: Section Overviews (Brief Summaries): Generate concise summaries for each section, capturing the main points and supporting details in a few sentences.
+    Level 3: Argument/Finding Identification (Focus on Content): Identify and summarize the main arguments, findings, or conclusions within each section, omitting irrelevant details.
+    Level 4: Textual Overview (Holistic Summary): Create a concise summary of the entire text, highlighting key themes, relationships between sections, and the overall message.
+    Level 5: Keyword Extraction and Analysis (Deep Content Exploration): Identify and analyze key keywords and phrases throughout the text, revealing hidden connections and deeper meanings.
+    Level 6: Causal Inference and Relationship Mapping (Advanced Analysis): Infer causal relationships between events or concepts, and map the connections between different sections of the text.
+    Level 7: Contextual Awareness and Fact-Checking (Enhanced Accuracy): Integrate external knowledge and fact-checking mechanisms to verify information and provide contextually relevant summaries.
+    Level 8: Multiple Perspectives and Counterarguments (Critical Analysis): Identify and summarize potential counterarguments or alternative viewpoints presented in the text, fostering critical thinking.
+    Level 9: Abstract Conceptualization and Synthesis (Highest Abstraction): Extract the core concepts, themes, and implications of the text, presenting a high-level understanding without losing critical details.
     
     The text is given below, enclosed within triple backticks. This text is to be summarized according to level {level}.
     ```
@@ -94,17 +93,78 @@ def generate_summary(text, level):
         prompt,
         generation_config={
             'temperature': 0,
-            'max_output_tokens': 2000
+            'max_output_tokens': 1000
         }
     )
 
     return completion.text
 
-# Streamlit app start (need to make this more beautiful)
-st.title("Research Paper Section Dividerr")
-remove_all = st.checkbox("Remove all content after (and including) 'References'", value=True)
+def level_manual():
+    with st.sidebar:
+        with st.container(border=True):
+            st.header("About this project")
+            st.markdown("""
+                This Streamlit app leverages the power of Natural Language Processing (NLP) to summarize text documents based on nine distinct levels of abstraction. 
 
+                **What does it do?**
+
+                * It takes your text input and analyzes its content.
+                * It extracts key sentences and concepts at different levels of detail, from high-level overviews to granular specifics.
+                * It presents you with a concise summary tailored to your desired level of abstraction.
+
+                **Why is it useful?**
+
+                * Quickly grasp the main points of lengthy documents.
+                * Identify key information relevant to your specific needs.
+                * Enhance your understanding of complex topics.
+                * Save time and effort when reading and processing information.
+
+            """)
+    
+    levels_expander = st.expander("Levels of Abstraction")
+
+    levels_expander.markdown("""
+        **Abstraction Level** | **Description**
+        ---|---
+        Level 1 | **Key Sentences (Sentence Extraction)**: Identify the most important sentences from each section, representing the main points without additional explanations.
+        Level 2 | **Section Overviews (Brief Summaries)**: Generate concise summaries for each section, capturing the main points and supporting details in a few sentences.
+        Level 3 | **Argument/Finding Identification (Focus on Content)**: Identify and summarize the main arguments, findings, or conclusions within each section, omitting irrelevant details.
+        Level 4 | **Textual Overview (Holistic Summary)**: Create a concise summary of the entire text, highlighting key themes, relationships between sections, and the overall message.
+        Level 5 | **Keyword Extraction and Analysis (Deep Content Exploration)**: Identify and analyze key keywords and phrases throughout the text, revealing hidden connections and deeper meanings.
+        Level 6 | **Causal Inference and Relationship Mapping (Advanced Analysis)**: Infer causal relationships between events or concepts, and map the connections between different sections of the text.
+        Level 7 | **Contextual Awareness and Fact-Checking (Enhanced Accuracy)**: Integrate external knowledge and fact-checking mechanisms to verify information and provide contextually relevant summaries.
+        Level 8 | **Multiple Perspectives and Counterarguments (Critical Analysis)**: Identify and summarize potential counterarguments or alternative viewpoints presented in the text, fostering critical thinking.
+        Level 9 | **Abstract Conceptualization and Synthesis (Highest Abstraction)**: Extract the core concepts, themes, and implications of the text, presenting a high-level understanding without losing critical details.
+        
+        """)
+
+def level_explain(level):
+    level_details = {
+        "Level 1": "Key Sentences (Sentence Extraction): Identify the most important sentences from each section, representing the main points without additional explanations.",
+        "Level 2": "Section Overviews (Brief Summaries): Generate concise summaries for each section, capturing the main points and supporting details in a few sentences.",
+        "Level 3": "Argument/Finding Identification (Focus on Content): Identify and summarize the main arguments, findings, or conclusions within each section, omitting irrelevant details.",
+        "Level 4": "Textual Overview (Holistic Summary): Create a concise summary of the entire text, highlighting key themes, relationships between sections, and the overall message.",
+        "Level 5": "Keyword Extraction and Analysis (Deep Content Exploration): Identify and analyze key keywords and phrases throughout the text, revealing hidden connections and deeper meanings.",
+        "Level 6": "Causal Inference and Relationship Mapping (Advanced Analysis): Infer causal relationships between events or concepts, and map the connections between different sections of the text.",
+        "Level 7": "Contextual Awareness and Fact-Checking (Enhanced Accuracy): Integrate external knowledge and fact-checking mechanisms to verify information and provide contextually relevant summaries.",
+        "Level 8": "Multiple Perspectives and Counterarguments (Critical Analysis): Identify and summarize potential counterarguments or alternative viewpoints presented in the text, fostering critical thinking.",
+        "Level 9": "Abstract Conceptualization and Synthesis (Highest Abstraction): Extract the core concepts, themes, and implications of the text, presenting a high-level understanding without losing critical details."
+    }
+    lvl = f"Level {level}"
+    head, bod = level_details[lvl].split(":")
+    container = st.container(border=True)
+    container.subheader(f"{lvl}: {head}")
+    container.caption(bod)
+
+progress_text = "Operation in progress. Please wait."
+                    
+# Streamlit app start (need to make this more beautiful)
+st.title("Research Paper Section Divider")
 uploaded_file = st.file_uploader("Upload your research paper PDF")
+remove_all = st.checkbox("Remove all content after (and including) 'References'", value=True)
+level_manual()
+
+st.divider()    
 
 if uploaded_file:
     text = extract_text(uploaded_file)
@@ -117,16 +177,24 @@ if uploaded_file:
     elif remove_all == False:
         fin_sections = split_sections
 
-    st.subheader("Sections:")
-    list_titles = title_disp(fin_sections)
-    st.write(list_titles)
+    #st.subheader("Sections:")
+    #list_titles = title_disp(fin_sections)
+    #st.write(list_titles)
 
-    ## ow starts the ML Part
+    ## Now starts the ML Part
     # Combine split sections with <section/> tag for easy usage with genAI.
     spliced_text = combine(fin_sections)
 
-    level = st.radio("Which level of summarization do you need?", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], captions=["No summaization at all", "", "", "", "", "", "", "", "", "Full summarization"])
+    # TODO: Add button thata makes the model function, instead of making it run as soon as level is changed.
+    level = st.slider("Which level of summarization do you need?", 1, 9, 4)
+    level_explain(level)
+
     if level:
+        my_bar = st.progress(0, text=progress_text)
+        for percent_complete in range(100):
+            time.sleep(0.1)
+            my_bar.progress(percent_complete + 1, text=progress_text)
+
         st.write(generate_summary(spliced_text, level))
 
 st.write()
