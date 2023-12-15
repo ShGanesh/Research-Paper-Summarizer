@@ -3,7 +3,7 @@ import PyPDF2
 import google.generativeai as genai
 import time
 
-genai_API_KEY = st.secrets["genai_API"]
+genai_API_KEY = "AIzaSyDJuE5IOcFhuFf3v23UfdzpEWepPNeq4AU"#st.secrets["genai_API"]
 
 genai.configure(api_key=genai_API_KEY)
 model = genai.GenerativeModel(model_name='gemini-pro')
@@ -162,6 +162,8 @@ progress_text = "Operation in progress. Please wait."
 st.title("Research Paper Summarizer")
 uploaded_file = st.file_uploader("Upload your research paper PDF")
 remove_all = st.checkbox("Remove all content after (and including) 'References'", value=True)
+
+st.divider()    
 level_manual()
 
 st.divider()    
@@ -172,31 +174,41 @@ if uploaded_file:
     section_boundaries = find_section_boundaries(text, sections)
     split_sections = split_text(text, section_boundaries)
 
+    #st.subheader("Sections:")
+    #list_titles = title_disp(fin_sections)
+    #st.write(list_titles)
+
+    level = st.slider("Which level of summarization do you need?", 1, 9, 4)
+    level_explain(level)
+
+    # Button to summarize
+    
     if (remove_all == True):
         fin_sections = remove_after_references(split_sections)
     elif remove_all == False:
         fin_sections = split_sections
 
-    #st.subheader("Sections:")
-    #list_titles = title_disp(fin_sections)
-    #st.write(list_titles)
-
     ## Now starts the ML Part
     # Combine split sections with <section/> tag for easy usage with genAI.
     spliced_text = combine(fin_sections)
-
-    # TODO: Add button thata makes the model function, instead of making it run as soon as level is changed.
-    level = st.slider("Which level of summarization do you need?", 1, 9, 4)
-    level_explain(level)
-
+    if level:
+        isTrue = False
+        if st.button("Generate Text"):
+            my_bar = st.progress(0, text=progress_text)
+            for percent_complete in range(100):
+                time.sleep(0.1)
+                my_bar.progress(percent_complete + 1, text=progress_text)
+            st.write(generate_summary(spliced_text, level))
+            my_bar.empty()
+    ignore = '''
     if level:
         my_bar = st.progress(0, text=progress_text)
         for percent_complete in range(100):
             time.sleep(0.1)
             my_bar.progress(percent_complete + 1, text=progress_text)
-        # TODO: Add button here.
         st.write(generate_summary(spliced_text, level))
+    '''
 
-st.write()
 # Footer
+st.divider()
 st.markdown(f"Copyright © 2023 ShGanesh. All rights reserved. Visit [shganesh.streamlit.app](%shganesh.streamlit.app) to see my other projects :smile:")
