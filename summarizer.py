@@ -3,7 +3,7 @@ import PyPDF2
 import google.generativeai as genai
 import time
 
-genai_API_KEY = "AIzaSyDJuE5IOcFhuFf3v23UfdzpEWepPNeq4AU"#st.secrets["genai_API"]
+genai_API_KEY = st.secrets["genai_API"]
 
 genai.configure(api_key=genai_API_KEY)
 model = genai.GenerativeModel(model_name='gemini-pro')
