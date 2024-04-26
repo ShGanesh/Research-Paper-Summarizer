@@ -211,4 +211,5 @@ if uploaded_file:
 
 # Footer
 st.divider()
-st.markdown(f"Copyright © 2023 ShGanesh. All rights reserved. Visit [shganesh.streamlit.app](%shganesh.streamlit.app) to see my other projects :smile:")
+st.markdown(f"Copyright © 2023 ShGanesh)
+#. All rights reserved. Visit [shganesh.streamlit.app](%shganesh.streamlit.app) to see my other projects :smile:")
