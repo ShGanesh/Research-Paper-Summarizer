@@ -6,7 +6,7 @@ import time
 genai_API_KEY = st.secrets["genai_API"]
 
 genai.configure(api_key=genai_API_KEY)
-model = genai.GenerativeModel(model_name='gemini-pro')
+model = genai.GenerativeModel(model_name='gemini-2.0-flash')
 
 def upload_pdf():
   uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
